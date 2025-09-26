@@ -34,7 +34,7 @@ const server = http.createServer(app);
 // ---------------- Socket.IO ----------------
 const io = new Server(server, {
   cors: {
-    origin: "*", // allow all origins, change for production if needed
+    origin: "*", // allow all origins
     methods: ["GET", "POST"]
   }
 });
@@ -45,7 +45,7 @@ app.use(express.json());
 // ---------------- HTTP POST endpoint for ESP32 ----------------
 app.post("/data", (req, res) => {
   const sensorData = req.body;
-  console.log("📊 Sensor Data Received:", sensorData);
+  console.log("📊 ESP32 Sensor Data Received:", sensorData);
 
   // Broadcast to all connected clients
   io.emit("updateData", sensorData);
@@ -57,6 +57,12 @@ app.post("/data", (req, res) => {
 io.on("connection", (socket) => {
   console.log("📡 Client connected:", socket.id);
 
+  // ✅ Mobile sensor data
+  socket.on("mobileData", (data) => {
+    console.log("📱 Mobile Sensor Data Received:", data);
+    io.emit("mobileData", data); // broadcast to all clients
+  });
+
   socket.on("disconnect", () => {
     console.log("📴 Client disconnected:", socket.id);
   });
@@ -65,5 +71,5 @@ io.on("connection", (socket) => {
 // ---------------- Start Server ----------------
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+  console.log(✅ Server running on port ${PORT});
 });
